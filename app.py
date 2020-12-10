@@ -32,6 +32,3 @@ def task1_random():
 def task1_iWillNot():
     s = "<li>I will not waste time</li>\n" * 100
     return f'<ul id=blackboard>{s}</ul>'
-
-
-app.run(host='127.0.0.6')
