@@ -136,7 +136,8 @@ def top():
     except:
         orderby = "None"
     for i in data['handles'].split('|'):
-        ans.append([f'/task3/cf/profile/{i}/', i, requests.get(url.format(i)).json()['result'][0]['rating']])
+        handle = str(requests.get(url.format(i)).json()['result'][0]["handle"])
+        ans.append([f'/task3/cf/profile/{handle}/', handle, requests.get(url.format(i)).json()['result'][0]['rating']])
     y, reverse = (-2, False) if orderby == "None" else (-1, True)
     ans.sort(key=lambda x: x[y], reverse=reverse)
     return render_template("top.html", ans=ans)
