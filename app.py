@@ -145,6 +145,3 @@ def top():
 @app.errorhandler(404)
 def cf_error_page(error):
     return render_template("404_not_found.html"), 404
-
-
-app.run()
