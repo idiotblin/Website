@@ -1,0 +1,39 @@
+{% extends "main.html" %}
+{% block body %}
+<table class="table" id="submissions">
+    <thead>
+        <tr>
+            <th scope="col">Время</th>
+            <th scope="col">Задача</th>
+            <th scope="col">Вердикт</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for i in problem[page - 1] %}
+        <tr>
+            <td>{{ i[0] }}</td>
+            <td>{{ i[1] }}</td>
+            <td>{{ i[2] }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block content %}
+<nav aria-label="...">
+    <ul class="pagination">
+        {% for i in link %}
+        {% if i[0] == 'Previous' %}
+        <li class="page-item {% if page == 1 %}disabled{% endif %}">
+        {% elif i[0] == 'Next' %}
+        <li class="page-item {% if page == page_kol %}disabled{% endif %}">
+        {% else %}
+        <li class="page-item {% if i[0] == page %}active{% endif %}">
+        {% endif %}
+        <a class="page-link" href="{{ i[1] }}" tabindex="-1">{{ i[0] }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</nav>
+{% endblock %}

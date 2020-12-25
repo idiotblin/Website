@@ -1,0 +1,19 @@
+{% extends "main.html" %}
+{% block body %}
+<table class="table" id="top">
+    <thead>
+        <tr>
+            <th scope="col">Пользователь</th>
+            <th scope="col">Рейтинг</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for i in ans %}
+        <tr>
+            <td><a href="{{ i[0] }}">{{ i[1] }}</a></td>
+            <td>{{ i[2] }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
