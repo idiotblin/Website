@@ -16,7 +16,7 @@
     {% endfor %}
 </ul>
 {% if no_players %}
-<p id={{no_players_error}}">You need more people to create new gang:(</p>
+<p id={{no_players_error}}>You need more people to create new gang:(</p>
 {% else %}
 <form id="toss" name="toss" method="post" action={{url}}>
     <input name="toss_players_button" type="submit" value="Toss!"/>
