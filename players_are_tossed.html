@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<h1>Play Supra gang!</h1>
+<ul id="pairs">
+    <h2>Pairs:</h2>
+    {% for i in range(0, size, 2) %}
+    <li>{{players[i]}} + {{players[i + 1]}}</li>
+    {% endfor %}
+</ul>
+</body>
+</html>
