@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, getrandbits, shuffle
 
 import json
 import requests
@@ -146,3 +146,83 @@ def top():
 @app.errorhandler(404)
 def cf_error_page(error):
     return render_template("404_not_found.html"), 404
+
+
+data_set = {
+    "token": "4UffYATBFJOqTiy9aJDnajwBa5XrSTfy",
+    "secret": "OzP7YML4m3tb9rxSnY9Z8Cmo2vT8dphn",
+    "command": "set",
+    "key": "",
+    "value": ""
+}
+
+data_get = {
+    "token": "4UffYATBFJOqTiy9aJDnajwBa5XrSTfy",
+    "secret": "OzP7YML4m3tb9rxSnY9Z8Cmo2vT8dphn",
+    "command": "get",
+    "key": ""
+}
+
+
+@app.route('/task4/santa/create', methods=['GET', 'POST'])
+def create():
+    if request.method == 'GET':
+        return render_template('create_game.html')
+    form = request.form
+    name = form['name']
+    code = str(getrandbits(64))
+    secret = str(getrandbits(64))
+    link_player = f'/task4/santa/play/{code}'
+    link_creator = f'/task4/santa/toss/{code}/{secret}'
+    data_set['key'] = code
+    data_set['value'] = json.dumps({"name": name, "code": code, "secret": secret, "play": link_player,
+                                    "organize": link_creator, "active": "True", "players": []})
+    requests.post("https://arsenwisheshappy2021.herokuapp.com/query", data=data_set)
+    return render_template("game_created.html", link_player=link_player, link_creator=link_creator)
+
+
+@app.route('/task4/santa/play/<link>', methods=["GET", "POST"])
+def play(link):
+    no_game_error = 'error'
+    no_name_error = 'error'
+    url = f'/task4/santa/play/{link}'
+    data_get["key"] = link
+    if request.method == 'GET':
+        game = json.loads(requests.post("https://arsenwisheshappy2021.herokuapp.com/query", data=data_get).text)
+        no_game = False
+        if game["active"] == "False":
+            no_game = True
+        return render_template('player_registration.html', url=url, no_game=no_game, no_game_error=no_game_error,
+                               no_name_error=no_name_error)
+    form = request.form
+    if form["name"].strip() == '':
+        return render_template('player_registration.html', url=url, no_name=True, no_game_error=no_game_error,
+                               no_name_error=no_name_error)
+    name = form["name"]
+    game = json.loads(requests.post("https://arsenwisheshappy2021.herokuapp.com/query", data=data_get).text)
+    game["players"].append(name)
+    data_set["key"] = link
+    data_set["value"] = json.dumps(game)
+    requests.post("https://arsenwisheshappy2021.herokuapp.com/query", data=data_set)
+    return render_template("player_registered.html", name=name)
+
+
+@app.route("/task4/santa/toss/<link>/<secret>", methods=["GET", "POST"])
+def toss(link, secret):
+    no_game_error = 'error'
+    no_players_error = 'error'
+    url = f'/task4/santa/toss/{link}/{secret}'
+    data_get["key"] = link
+    game = json.loads(requests.post("https://arsenwisheshappy2021.herokuapp.com/query", data=data_get).text)
+    players = game["players"]
+    if request.method == "GET":
+        no_game = game["active"] == "False"
+        no_players = len(players) == 0 or len(players) % 2 == 1
+        return render_template("toss_players.html", url=url, no_game=no_game, no_game_error=no_game_error,
+                               no_players=no_players, no_players_error=no_players_error, players=players)
+    shuffle(players)
+    game["active"] = "False"
+    data_set["key"] = link
+    data_set["value"] = json.dumps(game)
+    requests.post("https://arsenwisheshappy2021.herokuapp.com/query", data=data_set)
+    return render_template('players_are_tossed.html', players=players, size=len(players))

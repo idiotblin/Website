@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<h1>New Supra Gang</h1>
+{% if no_game %}
+<p id={{no_game_error}}>Sorry, this Supra gang has already broken up</p>
+{% else %}
+{% if no_name %}
+<p id={{no_name_error}}>Please, enter your name</p>
+{% endif %}
+<form action={{url}} id="play" method="POST">
+    <input name="name" type="text" id="name"/>
+    <input id="submitting" name="submitting_name" type="submit" value="Play!"/>
+</form>
+{% endif %}
+</body>
+</html>
