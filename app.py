@@ -1,10 +1,20 @@
 from random import randint, getrandbits, shuffle
+from flask import Flask, render_template, abort, redirect, request, url_for, session
+from email.message import EmailMessage
+from hashlib import md5
 
+import datetime
 import json
+import os
+import psycopg2
 import requests
-from flask import Flask, render_template, abort, redirect, request
+import smtplib
 
 app = Flask(__name__)
+
+conn = psycopg2.connect(
+    f'dbname={os.environ["Dbname"]} user={os.environ["User"]} password={os.environ["Password"]} host={os.environ["Host"]} port={os.environ["Port"]}')
+cur = conn.cursor()
 
 
 @app.route('/')
@@ -109,8 +119,8 @@ def task3_cf_profile(handle, page_number):
     problem = list()
     problem.append(list())
     ind = 0
-    for attemp in data['result']:
-        problem[ind].append((attemp['creationTimeSeconds'], attemp['problem']['name'], attemp['verdict']))
+    for attempt in data['result']:
+        problem[ind].append((attempt['creationTimeSeconds'], attempt['problem']['name'], attempt['verdict']))
         if len(problem[ind]) == 25:
             ind += 1
             problem.append(list())
@@ -149,16 +159,16 @@ def cf_error_page(error):
 
 
 data_set = {
-    "token": "4UffYATBFJOqTiy9aJDnajwBa5XrSTfy",
-    "secret": "OzP7YML4m3tb9rxSnY9Z8Cmo2vT8dphn",
+    "token": os.environ['token'],
+    "secret": os.environ['secret'],
     "command": "set",
     "key": "",
     "value": ""
 }
 
 data_get = {
-    "token": "4UffYATBFJOqTiy9aJDnajwBa5XrSTfy",
-    "secret": "OzP7YML4m3tb9rxSnY9Z8Cmo2vT8dphn",
+    "token": os.environ['token'],
+    "secret": os.environ['secret'],
     "command": "get",
     "key": ""
 }
@@ -226,3 +236,96 @@ def toss(link, secret):
     data_set["value"] = json.dumps(game)
     requests.post("https://arsenwisheshappy2021.herokuapp.com/query", data=data_set)
     return render_template('players_are_tossed.html', players=players, size=len(players))
+
+
+def is_human(captcha_response):
+    secret = os.environ['secret_key']
+    payload = {'response': captcha_response, 'secret': secret}
+    response = requests.post("https://www.google.com/recaptcha/api/siteverify", payload)
+    response_text = json.loads(response.text)
+    return response_text['success']
+
+
+@app.route('/task5/sign-up', methods=["GET", "POST"])
+def sign_up_step_1():
+    if request.method == 'GET':
+        return render_template('sign_up_step_1.html', site_key=os.environ['site_key'])
+    captcha_response = request.form['g-recaptcha-response']
+    email = request.form["email"]
+    cur.execute(f'select * from users where users.email = {email};')
+    user_exist = len(cur.fetchone()) != 0
+    if is_human(captcha_response) and not user_exist:
+        msg = EmailMessage()
+        msg.set_content(f'/task5/sign-up/{email + "|" + md5(email)}')
+        msg['Subject'] = 'Gena na'
+        msg['From'] = 'no-reply@___.herokuapp.com'
+        msg['To'] = email
+        s = smtplib.SMTP('b.li2sites.ru', 30025)
+        s.send_message(msg)
+        s.quit()
+        return render_template('capture_passed.html')
+    else:
+        return render_template('capture_failed.html')
+
+
+@app.route('/task5/sign-up/<hsh>', methods=["GET", "POST"])
+def sign_up_step_2(hsh):
+    email = hsh.split('|')[0]
+    if request.method == 'GET':
+        return render_template('sign_up_step_2.html', url=f'/task5/sign-up/{hsh}', email=email)
+    pass1 = request.form['pass1']
+    pass2 = request.form['pass2']
+    correct = pass1 == pass2
+    if correct:
+        cur.execute(f'insert into users (email, password) values ({email}, {md5(pass1)});')
+        conn.commit()
+    return render_template('sign_up_finished.html', error=correct)
+
+
+@app.route('/task5/sign-in', methods=["GET", "POST"])
+def sign_in():
+    if request.method == "GET":
+        return render_template("sign_in.html")
+    email = request.form['email']
+    password = request.form['password']
+    cur.execute(f'select * from users where email = {email} and password = {md5(password)};')
+    correct = len(cur.fetchone()) != 0
+    if correct:
+        session['logged'] = True
+        time = datetime.datetime.now()
+        ip = request.remote_addr
+        cur.execute(f'insert into conns (email, time, ip) values ({email}, {time}, {ip});')
+        redirect(url_for('main'), email=email)
+    else:
+        redirect(url_for('sign_in'))
+
+
+@app.route('/task5/sign-out')
+def sign_out():
+    session['logged'] = False
+    return f"<pre>{'signed out'}</pre>"
+
+
+@app.route('/task5/')
+def main(email):
+    cur.execute(f'select * from conns where email={email};')
+    res = cur.fetchall()
+    return render_template('signed_in.html', attempts=res)
+
+
+@app.route('/task5/work/', methods=["GET", "POST"])
+def work():
+    if not session.get('logged', False):
+        redirect(url_for('sign_in'))
+    if request.method == 'POST':
+        n = request.form['n']
+        data = datetime.datetime.now()
+        cur.execute(f"insert into work(time, n, status) values ({data}, {n}, {'Queued'});")
+        conn.commit()
+    cur.execute("select * from work;")
+    tasks = cur.fetchall()
+    return render_template('tasks.html', id="work", tasks=tasks)
+
+
+if __name__ == '__main__':
+    app.run()
