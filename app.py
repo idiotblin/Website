@@ -12,6 +12,8 @@ import smtplib
 
 app = Flask(__name__)
 
+app.secret_key = bytes(os.environ['secret'])
+
 conn = psycopg2.connect(
     f'dbname={os.environ["Dbname"]} user={os.environ["User"]} password={os.environ["Password"]} host={os.environ["Host"]} port={os.environ["Port"]}')
 cur = conn.cursor()
