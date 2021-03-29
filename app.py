@@ -1,7 +1,7 @@
 from random import randint, getrandbits, shuffle
 from flask import Flask, render_template, abort, redirect, request, url_for, session
 from email.message import EmailMessage
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import datetime
 import json
@@ -268,7 +268,7 @@ def sign_up_step_1():
     captcha_response = request.form['g-recaptcha-response']
     email = request.form["email"]
     cur.execute(f"select * from users where users.email = '{email}';")
-    user_exist = cur.fetchone() is not None
+    user_exist = len(cur.fetchall()) != 0
     if is_human(captcha_response) and not user_exist:
         msg = EmailMessage()
         msg.set_content(f'http://abdulla-aby.herokuapp.com/task5/sign-up/{email + "|" + generate_password_hash(email)}')
@@ -303,14 +303,15 @@ def sign_in():
         return render_template("sign_in.html")
     email = request.form['email']
     password = request.form['password']
-    cur.execute(f"select * from users where email = '{email}' and password = '{generate_password_hash(password)}';")
-    correct = cur.fetchone() is not None
+    cur.execute(f"select * from users where email = '{email}';")
+    res = cur.fetchall()
+    correct = len(res) != 0 and check_password_hash(res[0][2], password)
     if correct:
         session['logged'] = True
         time = datetime.datetime.now()
         ip = request.remote_addr
         cur.execute(f"insert into conns (email, time, ip) values ('{email}', '{time}', '{ip}');")
-        return redirect(url_for('main'), email=email)
+        return redirect(url_for('main', email=email))
     else:
         return redirect(url_for('sign_in'))
 
