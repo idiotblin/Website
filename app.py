@@ -263,14 +263,15 @@ def disable():
 @app.route('/task5/sign-up', methods=["GET", "POST"])
 def sign_up_step_1():
     if request.method == 'GET':
-        return render_template('sign_up_step_1.html', site_key=os.environ['site_key'], enable=session.get('enable', False))
+        return render_template('sign_up_step_1.html', site_key=os.environ['site_key'],
+                               enable=session.get('enable', False))
     captcha_response = request.form['g-recaptcha-response']
     email = request.form["email"]
     cur.execute(f"select * from users where users.email = '{email}';")
     user_exist = cur.fetchone() is not None
     if is_human(captcha_response) and not user_exist:
         msg = EmailMessage()
-        msg.set_content(f'/task5/sign-up/{email + "|" + generate_password_hash(email)}')
+        msg.set_content(f'http://abdulla-aby.herokuapp.com/task5/sign-up/{email + "|" + generate_password_hash(email)}')
         msg['Subject'] = 'Gena na'
         msg['From'] = 'no-reply@abdulla-aby.herokuapp.com'
         msg['To'] = email
