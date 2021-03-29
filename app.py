@@ -1,7 +1,7 @@
 from random import randint, getrandbits, shuffle
 from flask import Flask, render_template, abort, redirect, request, url_for, session
 from email.message import EmailMessage
-from hashlib import md5
+from werkzeug.security import generate_password_hash
 
 import datetime
 import json
@@ -252,11 +252,11 @@ def sign_up_step_1():
         return render_template('sign_up_step_1.html', site_key=os.environ['site_key'])
     captcha_response = request.form['g-recaptcha-response']
     email = request.form["email"]
-    cur.execute(f'select * from users where users.email = {email};')
+    cur.execute(f"select * from users where users.email = '{email}';")
     user_exist = len(cur.fetchone()) != 0
     if is_human(captcha_response) and not user_exist:
         msg = EmailMessage()
-        msg.set_content(f'/task5/sign-up/{email + "|" + md5(email)}')
+        msg.set_content(f'/task5/sign-up/{email + "|" + generate_password_hash(email)}')
         msg['Subject'] = 'Gena na'
         msg['From'] = 'no-reply@abdulla-aby.herokuapp.com'
         msg['To'] = email
@@ -277,7 +277,7 @@ def sign_up_step_2(hsh):
     pass2 = request.form['pass2']
     correct = pass1 == pass2
     if correct:
-        cur.execute(f'insert into users (email, password) values ({email}, {md5(pass1)});')
+        cur.execute(f"insert into users (email, password) values ('{email}', '{generate_password_hash(pass1)})';")
         conn.commit()
     return render_template('sign_up_finished.html', error=correct)
 
@@ -288,13 +288,13 @@ def sign_in():
         return render_template("sign_in.html")
     email = request.form['email']
     password = request.form['password']
-    cur.execute(f'select * from users where email = {email} and password = {md5(password)};')
+    cur.execute(f"select * from users where email = '{email}' and password = '{generate_password_hash(password)}';")
     correct = len(cur.fetchone()) != 0
     if correct:
         session['logged'] = True
         time = datetime.datetime.now()
         ip = request.remote_addr
-        cur.execute(f'insert into conns (email, time, ip) values ({email}, {time}, {ip});')
+        cur.execute(f"insert into conns (email, time, ip) values ('{email}', '{time}', '{ip}');")
         return redirect(url_for('main'), email=email)
     else:
         return redirect(url_for('sign_in'))
@@ -310,7 +310,7 @@ def sign_out():
 def main(email=None):
     if not session.get('logged', False):
         return redirect(url_for('sign_in'))
-    cur.execute(f'select * from conns where email={email};')
+    cur.execute(f"select * from conns where email = '{email}';")
     res = cur.fetchall()
     return render_template('signed_in.html', attempts=res)
 
@@ -322,7 +322,7 @@ def work():
     if request.method == 'POST':
         n = request.form['n']
         data = datetime.datetime.now()
-        cur.execute(f"insert into work(time, n, status) values ({data}, {n}, {'Queued'});")
+        cur.execute(f"insert into work(time, n, status) values ('{data}', {n}, {'Queued'});")
         conn.commit()
         return
     cur.execute("select * from work;")

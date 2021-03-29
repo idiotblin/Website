@@ -20,7 +20,7 @@ while True:
         id = task[0]
         cur.execute(f"delete from work where id={id};")
         conn.commit()
-        cur.execute(f"insert into work(time, N, status) values ({date}, {n}, 'Processing');")
+        cur.execute(f"insert into work(time, N, status) values ('{date}', {n}, 'Processing');")
         conn.commit()
         date = task[1]
         n = task[2]
@@ -31,7 +31,7 @@ while True:
                 end = datetime.datetime.now().second
                 cur.execute(f"delete from work where n={n} and status='Processing';")
                 conn.commit()
-                cur.execute(f"insert into work(time, N, p, q, status, elapsed) values ({date}, {n}, {p}, {q}, 'Done', {end - begin});")
+                cur.execute(f"insert into work(time, N, p, q, status, elapsed) values ('{date}', {n}, {p}, {q}, 'Done', {end - begin});")
                 conn.commit()
                 break
     time.sleep(5)
