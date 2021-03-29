@@ -13,7 +13,7 @@ def prime(n):
 
 
 while True:
-    cur.execute(f"select * from work where status={'Queued'};")
+    cur.execute(f"select * from work where status='Queued';")
     task = cur.fetchall()[0]
     id = task[0]
     cur.execute(f"delete from work where id={id};")
@@ -27,7 +27,7 @@ while True:
         q = n // p
         if q * p == n and prime(p) and prime(q):
             end = datetime.datetime.now().second
-            cur.execute(f"delete from work where n={n} and status={'Processing'};")
+            cur.execute(f"delete from work where n={n} and status='Processing';")
             conn.commit()
             cur.execute(f"insert into work(time, N, p, q, status, elapsed) values ({date}, {n}, {p}, {q}, 'Done', {end - begin});")
             conn.commit()
