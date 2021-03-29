@@ -14,22 +14,24 @@ def prime(n):
 
 while True:
     cur.execute(f"select * from work where status='Queued';")
-    task = cur.fetchall()[0]
-    id = task[0]
-    cur.execute(f"delete from work where id={id};")
-    conn.commit()
-    cur.execute(f"insert into work(time, N, status) values ({date}, {n}, 'Processing');")
-    conn.commit()
-    date = task[1]
-    n = task[2]
-    begin = datetime.datetime.now().second
-    for p in range(2, n ** 0.5 + 1):
-        q = n // p
-        if q * p == n and prime(p) and prime(q):
-            end = datetime.datetime.now().second
-            cur.execute(f"delete from work where n={n} and status='Processing';")
-            conn.commit()
-            cur.execute(f"insert into work(time, N, p, q, status, elapsed) values ({date}, {n}, {p}, {q}, 'Done', {end - begin});")
-            conn.commit()
-            break
+    task = cur.fetchall()
+    if len(task) > 0:
+        task = task[0]
+        id = task[0]
+        cur.execute(f"delete from work where id={id};")
+        conn.commit()
+        cur.execute(f"insert into work(time, N, status) values ({date}, {n}, 'Processing');")
+        conn.commit()
+        date = task[1]
+        n = task[2]
+        begin = datetime.datetime.now().second
+        for p in range(2, n ** 0.5 + 1):
+            q = n // p
+            if q * p == n and prime(p) and prime(q):
+                end = datetime.datetime.now().second
+                cur.execute(f"delete from work where n={n} and status='Processing';")
+                conn.commit()
+                cur.execute(f"insert into work(time, N, p, q, status, elapsed) values ({date}, {n}, {p}, {q}, 'Done', {end - begin});")
+                conn.commit()
+                break
     time.sleep(5)
