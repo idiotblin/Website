@@ -292,7 +292,7 @@ def sign_up_step_2(hsh):
     pass2 = request.form['pass2']
     correct = pass1 == pass2
     if correct:
-        cur.execute(f"insert into users (email, password) values ('{email}', '{generate_password_hash(pass1)})';")
+        cur.execute(f"insert into users (email, password) values ('{email}', '{generate_password_hash(pass1)}');")
         conn.commit()
     return render_template('sign_up_finished.html', error=correct)
 
