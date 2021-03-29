@@ -295,9 +295,9 @@ def sign_in():
         time = datetime.datetime.now()
         ip = request.remote_addr
         cur.execute(f'insert into conns (email, time, ip) values ({email}, {time}, {ip});')
-        redirect(url_for('main'), email=email)
+        return redirect(url_for('main'), email=email)
     else:
-        redirect(url_for('sign_in'))
+        return redirect(url_for('sign_in'))
 
 
 @app.route('/task5/sign-out')
@@ -307,7 +307,9 @@ def sign_out():
 
 
 @app.route('/task5/')
-def main(email):
+def main(email=None):
+    if not session.get('logged', False):
+        return redirect(url_for('sign_in'))
     cur.execute(f'select * from conns where email={email};')
     res = cur.fetchall()
     return render_template('signed_in.html', attempts=res)
@@ -316,12 +318,13 @@ def main(email):
 @app.route('/task5/work/', methods=["GET", "POST"])
 def work():
     if not session.get('logged', False):
-        redirect(url_for('sign_in'))
+        return redirect(url_for('sign_in'))
     if request.method == 'POST':
         n = request.form['n']
         data = datetime.datetime.now()
         cur.execute(f"insert into work(time, n, status) values ({data}, {n}, {'Queued'});")
         conn.commit()
+        return
     cur.execute("select * from work;")
     tasks = cur.fetchall()
     return render_template('tasks.html', id="work", tasks=tasks)
