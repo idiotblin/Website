@@ -8,6 +8,7 @@
 <body>
 <h1>Sign Up - Step 1</h1>
 <form action="/task5/sign-up" id="sign-up" method="POST">
+    E-mail <input type="text" name="email" id="email">
     {% if not enable %}
     <div class="g-recaptcha" data-sitekey={{ site_key }}></div><br>
     {% endif %}
