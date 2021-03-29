@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<h1>Work</h1>
+<form id="work" method="post">
+    <input type="text" id="n" name="n">
+</form>
+<table class="table" id={{id}}>
+    <thead>
+    <th scope="col">Time</th>
+    <th scope="col">N</th>
+    <th scope="col">p</th>
+    <th scope="col">q</th>
+    <th scope="col">Status</th>
+    <th scope="col">Elapsed(sec)</th>
+    </thead>
+    <tbody>
+    {% for task in tasks %}
+    <td>{{task[1]}}</td>
+    <td>{{task[2]}}</td>
+    <td>{{task[3]}}</td>
+    <td>{{task[4]}}</td>
+    <td>{{task[5]}}</td>
+    <td>{{task[6]}}</td>
+    {% else %}
+    <td colspan="6" class="table-warning">No work yet:(</td>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>
