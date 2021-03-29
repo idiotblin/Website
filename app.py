@@ -258,7 +258,7 @@ def sign_up_step_1():
         msg = EmailMessage()
         msg.set_content(f'/task5/sign-up/{email + "|" + md5(email)}')
         msg['Subject'] = 'Gena na'
-        msg['From'] = 'no-reply@___.herokuapp.com'
+        msg['From'] = 'no-reply@abdulla-aby.herokuapp.com'
         msg['To'] = email
         s = smtplib.SMTP('b.li2sites.ru', 30025)
         s.send_message(msg)
