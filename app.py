@@ -311,6 +311,7 @@ def sign_in():
         time = datetime.datetime.now()
         ip = request.remote_addr
         cur.execute(f"insert into conns (email, time, ip) values ('{email}', '{time}', '{ip}');")
+        conn.commit()
         return redirect(url_for('main', email=email))
     else:
         return redirect(url_for('sign_in'))
