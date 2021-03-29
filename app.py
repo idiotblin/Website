@@ -265,7 +265,7 @@ def sign_up_step_1():
     captcha_response = request.form['g-recaptcha-response']
     email = request.form["email"]
     cur.execute(f"select * from users where users.email = '{email}';")
-    user_exist = len(cur.fetchone()) != 0
+    user_exist = cur.fetchone() is not None
     if is_human(captcha_response) and not user_exist:
         msg = EmailMessage()
         msg.set_content(f'/task5/sign-up/{email + "|" + generate_password_hash(email)}')
