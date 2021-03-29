@@ -261,7 +261,7 @@ def disable():
 @app.route('/task5/sign-up', methods=["GET", "POST"])
 def sign_up_step_1():
     if request.method == 'GET':
-        return render_template('sign_up_step_1.html.html', site_key=os.environ['site_key'], enable=session.get('enable', False))
+        return render_template('sign_up_step_1.html', site_key=os.environ['site_key'], enable=session.get('enable', False))
     captcha_response = request.form['g-recaptcha-response']
     email = request.form["email"]
     cur.execute(f"select * from users where users.email = '{email}';")
@@ -284,7 +284,7 @@ def sign_up_step_1():
 def sign_up_step_2(hsh):
     email = hsh.split('|')[0]
     if request.method == 'GET':
-        return render_template('sign_up_step_2.html.html', url=f'/task5/sign-up/{hsh}', email=email)
+        return render_template('sign_up_step_2.html', url=f'/task5/sign-up/{hsh}', email=email)
     pass1 = request.form['pass1']
     pass2 = request.form['pass2']
     correct = pass1 == pass2
