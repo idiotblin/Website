@@ -10,7 +10,7 @@
 <form action="/task5/sign-up" id="sign-up" method="POST">
     E-mail <input type="text" name="email" id="email">
     {% if not enable %}
-    <div class="g-recaptcha" data-sitekey={{ site_key }}></div><br>
+    <div class="g-recaptcha" data-sitekey={{site_key}}></div><br>
     {% endif %}
     <input type="submit" value="Submit">
 </form>
