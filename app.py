@@ -289,7 +289,7 @@ def sign_in():
     email = request.form['email']
     password = request.form['password']
     cur.execute(f"select * from users where email = '{email}' and password = '{generate_password_hash(password)}';")
-    correct = len(cur.fetchone()) != 0
+    correct = cur.fetchone() is not None
     if correct:
         session['logged'] = True
         time = datetime.datetime.now()
