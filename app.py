@@ -341,16 +341,6 @@ def sign_out():
     return f"<pre>{'signed out'}</pre>"
 
 
-@app.route('/task5/')
-def main():
-    if not session.get('logged', False):
-        return redirect(url_for('sign_in'))
-    email = session['email']
-    cur.execute(f"select * from conns where email = '{email}';")
-    res = cur.fetchall()
-    return render_template('signed_in.html', attempts=res)
-
-
 @app.route('/task5/work', methods=["GET", "POST"])
 def work():
     if not session.get('logged', False):
@@ -363,6 +353,16 @@ def work():
     cur.execute("select * from work;")
     tasks = cur.fetchall()
     return render_template('tasks.html', id="work", tasks=tasks)
+
+
+@app.route('/task5/')
+def main():
+    if not session.get('logged', False):
+        return redirect(url_for('sign_in'))
+    email = session['email']
+    cur.execute(f"select * from conns where email = '{email}';")
+    res = cur.fetchall()
+    return render_template('signed_in.html', attempts=res)
 
 
 if __name__ == '__main__':
