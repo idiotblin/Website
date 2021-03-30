@@ -8,7 +8,7 @@
 <h1>Work</h1>
 <form id="work" method="post">
     <input type="text" id="n" name="n"><br>
-    <input id="submitting" type="submit" value="Submit"/><br>
+    <input id="submitting" type="submit" value="Submit"/>
 </form>
 <table class="table" id={{ id }}>
     <thead>
@@ -21,14 +21,16 @@
     </thead>
     <tbody>
     {% for task in tasks %}
+        <tr>
         <td>{{ task[1] }}</td>
         <td>{{ task[2] }}</td>
         <td>{{ task[3] }}</td>
         <td>{{ task[4] }}</td>
         <td>{{ task[5] }}</td>
         <td>{{ task[6] }}</td>
+        </tr>
     {% else %}
-        <td colspan="6" class="table-warning">No work yet:(</td>
+        <tr><td colspan="6" class="table-warning">No work yet:(</td></tr>
     {% endfor %}
     </tbody>
 </table>
