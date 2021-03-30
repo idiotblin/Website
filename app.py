@@ -241,7 +241,7 @@ def toss(link, secret):
 
 
 def is_human(captcha_response):
-    if session['enable']:
+    if session.get('enable', False):
         return True
     secret = os.environ['secret_key']
     payload = {'response': captcha_response, 'secret': secret}
