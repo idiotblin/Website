@@ -6,7 +6,7 @@ cur = conn.cursor()
 
 
 def prime(n):
-    for i in range(2, n ** 0.5 + 1):
+    for i in range(2, int(n ** 0.5) + 1):
         if n % i == 0:
             return False
     return True
@@ -25,7 +25,7 @@ while True:
         cur.execute(f"insert into work(time, N, status) values ('{date}', {n}, 'Processing');")
         conn.commit()
         begin = datetime.datetime.now().second
-        for p in range(2, n ** 0.5 + 1):
+        for p in range(2, int(n ** 0.5) + 1):
             q = n // p
             if q * p == n and prime(p) and prime(q):
                 end = datetime.datetime.now().second
