@@ -276,7 +276,7 @@ def sign_up_step_1():
     if is_human(captcha_response) and not user_exist:
         msg = EmailMessage()
         hsh = generate_password_hash(email)
-        msg.set_content(f'http://abdulla-aby.herokuapp.com/task5/sign-up/{hsh}')
+        msg.set_content(f'link: http://abdulla-aby.herokuapp.com/task5/sign-up/{hsh}')
         msg['Subject'] = 'Gena na'
         msg['From'] = 'no-reply@abdulla-aby.herokuapp.com'
         msg['To'] = email
