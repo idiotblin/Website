@@ -304,7 +304,7 @@ def sign_up_step_2(hsh):
     pass2 = request.form['password2']
     correct = pass1 == pass2
     if correct:
-        cur.execute(f"delete from users where password='{hsh}';")
+        cur.execute(f"delete from users where email='{email}';")
         conn.commit()
         cur.execute(f"insert into users (email, password) values ('{email}', '{generate_password_hash(pass1)}');")
         conn.commit()
