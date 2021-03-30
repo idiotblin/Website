@@ -293,7 +293,8 @@ def sign_up_step_2(hsh):
     cur.execute(f"select * from users where password='{hsh}';")
     res = cur.fetchall()
     if len(res) == 0:
-        return redirect(sign_up_step_1)
+        return redirect(url_for('sign_up_step_1'))
+    print(res)
     email = res[0][1]
     cur.execute(f"delete from users where password='{hsh}';")
     conn.commit()
