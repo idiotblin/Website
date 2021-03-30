@@ -300,8 +300,8 @@ def sign_up_step_2(hsh):
         email = res[0][1]
         return render_template('sign_up_step_2.html', url=f'/task5/sign-up/{hsh}', email=email)
     email = res[0][1]
-    pass1 = request.form['pass1']
-    pass2 = request.form['pass2']
+    pass1 = request.form['password']
+    pass2 = request.form['password2']
     correct = pass1 == pass2
     if correct:
         cur.execute(f"delete from users where password='{hsh}';")
