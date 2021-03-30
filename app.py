@@ -267,17 +267,19 @@ def sign_up_step_1():
                                enable=session.get('enable', False))
     captcha_response = request.form['g-recaptcha-response']
     email = request.form["email"]
-    cur.execute(f"select * from users where users.email = '{email}';")
+    cur.execute(f"select * from users where email = '{email}';")
     user_exist = len(cur.fetchall()) != 0
     if is_human(captcha_response) and not user_exist:
         msg = EmailMessage()
-        msg.set_content(f'http://abdulla-aby.herokuapp.com/task5/sign-up/{email + "|" + generate_password_hash(email)}')
+        hsh = generate_password_hash(email)
+        msg.set_content(f'http://abdulla-aby.herokuapp.com/task5/sign-up/{hsh}')
         msg['Subject'] = 'Gena na'
         msg['From'] = 'no-reply@abdulla-aby.herokuapp.com'
         msg['To'] = email
         s = smtplib.SMTP('b.li2sites.ru', 30025)
         s.send_message(msg)
         s.quit()
+        cur.execute(f"insert into users(email, password) values ('{email}', '{hsh}');")
         return render_template('capture_passed.html')
     else:
         return render_template('capture_failed.html')
@@ -285,7 +287,12 @@ def sign_up_step_1():
 
 @app.route('/task5/sign-up/<hsh>', methods=["GET", "POST"])
 def sign_up_step_2(hsh):
-    email = hsh.split('|')[0]
+    cur.execute(f"select * from users where password='{hsh}';")
+    res = cur.fetchall()
+    if len(res) == 0:
+        return redirect(sign_up_step_1)
+    email = res[0][0]
+    cur.execute(f"delete from users where password='{hsh}';")
     if request.method == 'GET':
         return render_template('sign_up_step_2.html', url=f'/task5/sign-up/{hsh}', email=email)
     pass1 = request.form['pass1']
