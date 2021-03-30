@@ -353,7 +353,7 @@ def main():
     return render_template('signed_in.html', attempts=res)
 
 
-@app.route('/task5/work/', methods=["GET", "POST"])
+@app.route('/task5/work', methods=["GET", "POST"])
 def work():
     if not session.get('logged', False):
         return redirect(url_for('sign_in'))
