@@ -9,7 +9,7 @@
 <form id="work" method="post">
     <input type="text" id="n" name="n">
 </form>
-<table class="table" id={{id}}>
+<table class="table" id={{ id }}>
     <thead>
     <th scope="col">Time</th>
     <th scope="col">N</th>
@@ -20,14 +20,14 @@
     </thead>
     <tbody>
     {% for task in tasks %}
-    <td>{{task[1]}}</td>
-    <td>{{task[2]}}</td>
-    <td>{{task[3]}}</td>
-    <td>{{task[4]}}</td>
-    <td>{{task[5]}}</td>
-    <td>{{task[6]}}</td>
+        <td>{{ task[1] }}</td>
+        <td>{{ task[2] }}</td>
+        <td>{{ task[3] }}</td>
+        <td>{{ task[4] }}</td>
+        <td>{{ task[5] }}</td>
+        <td>{{ task[6] }}</td>
     {% else %}
-    <td colspan="6" class="table-warning">No work yet:(</td>
+        <td colspan="6" class="table-warning">No work yet:(</td>
     {% endfor %}
     </tbody>
 </table>

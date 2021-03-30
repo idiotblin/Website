@@ -6,16 +6,20 @@
 </head>
 <body>
 <table id="login-attempts">
+    <thead>
     <tr>
-        <th>Time</th>
-        <th>Ip</th>
+        <th scope="col">Time</th>
+        <th scope="col">Ip</th>
     </tr>
+    </thead>
+    <tbody>
     {% for attempt in attempts %}
-    <tr>
-        <td>attempt[2]</td>
-        <td>attempt[3]</td>
-    </tr>
+        <tr>
+            <td>{{attempt[2]}}</td>
+            <td>{{attempt[3]}}</td>
+        </tr>
     {% endfor %}
+    </tbody>
 </table>
 </body>
 </html>
