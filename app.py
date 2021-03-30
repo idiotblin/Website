@@ -294,18 +294,18 @@ def sign_up_step_1():
 def sign_up_step_2(hsh):
     cur.execute(f"select * from users where password='{hsh}';")
     res = cur.fetchall()
-    if len(res) == 0:
-        return redirect(url_for('sign_up_step_1'))
-    print(res)
-    email = res[0][1]
-    cur.execute(f"delete from users where password='{hsh}';")
-    conn.commit()
     if request.method == 'GET':
+        if len(res) == 0:
+            return redirect(url_for('sign_up_step_1'))
+        email = res[0][1]
         return render_template('sign_up_step_2.html', url=f'/task5/sign-up/{hsh}', email=email)
+    email = res[0][1]
     pass1 = request.form['pass1']
     pass2 = request.form['pass2']
     correct = pass1 == pass2
     if correct:
+        cur.execute(f"delete from users where password='{hsh}';")
+        conn.commit()
         cur.execute(f"insert into users (email, password) values ('{email}', '{generate_password_hash(pass1)}');")
         conn.commit()
     return render_template('sign_up_finished.html', error=correct)
@@ -313,20 +313,24 @@ def sign_up_step_2(hsh):
 
 @app.route('/task5/sign-in', methods=["GET", "POST"])
 def sign_in():
-    if request.method == "GET":
+    if request.method == "POST":
+        email = request.form['email']
+        password = request.form['password']
+        cur.execute(f"select * from users where email = '{email}';")
+        res = cur.fetchall()
+        correct = len(res) != 0 and check_password_hash(res[0][2], password)
+        if correct:
+            session['logged'] = True
+            time = datetime.datetime.now()
+            ip = request.remote_addr
+            cur.execute(f"insert into conns (email, time, ip) values ('{email}', '{time}', '{ip}');")
+            conn.commit()
+            session['email'] = email
+            return redirect(url_for('main'))
+        else:
+            return redirect(url_for('sign_in'))
+    if not session.get('logged', False):
         return render_template("sign_in.html")
-    email = request.form['email']
-    password = request.form['password']
-    cur.execute(f"select * from users where email = '{email}';")
-    res = cur.fetchall()
-    correct = len(res) != 0 and check_password_hash(res[0][2], password)
-    if correct:
-        session['logged'] = True
-        time = datetime.datetime.now()
-        ip = request.remote_addr
-        cur.execute(f"insert into conns (email, time, ip) values ('{email}', '{time}', '{ip}');")
-        conn.commit()
-        return redirect(url_for('main', email=email))
     else:
         return redirect(url_for('sign_in'))
 
@@ -338,11 +342,14 @@ def sign_out():
 
 
 @app.route('/task5/')
-def main(email=None):
+def main():
     if not session.get('logged', False):
         return redirect(url_for('sign_in'))
+    email = session['email']
     cur.execute(f"select * from conns where email = '{email}';")
     res = cur.fetchall()
+    print(email)
+    print(res)
     return render_template('signed_in.html', attempts=res)
 
 
