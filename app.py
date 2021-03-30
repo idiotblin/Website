@@ -332,7 +332,7 @@ def sign_in():
     if not session.get('logged', False):
         return render_template("sign_in.html")
     else:
-        return redirect(url_for('sign_in'))
+        return redirect(url_for('main'))
 
 
 @app.route('/task5/sign-out')
