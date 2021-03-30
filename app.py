@@ -266,8 +266,10 @@ def disable():
 def sign_up_step_1():
     if request.method == 'GET':
         return render_template('sign_up_step_1.html', site_key=os.environ['site_key'],
-                               enable=session.get('enable', False))
-    captcha_response = request.form['g-recaptcha-response']
+                               enable=(not session.get('enable', False)))
+    captcha_response = ()
+    if not session.get('enable', False):
+        captcha_response = request.form['g-recaptcha-response']
     email = request.form["email"]
     cur.execute(f"select * from users where email = '{email}';")
     user_exist = len(cur.fetchall()) != 0
