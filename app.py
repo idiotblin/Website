@@ -362,7 +362,6 @@ def work():
         data = datetime.datetime.now()
         cur.execute(f"insert into work(time, n, status) values ('{data}', {n}, {'Queued'});")
         conn.commit()
-        return
     cur.execute("select * from work;")
     tasks = cur.fetchall()
     return render_template('tasks.html', id="work", tasks=tasks)
