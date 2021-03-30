@@ -241,6 +241,8 @@ def toss(link, secret):
 
 
 def is_human(captcha_response):
+    if session['enable']:
+        return True
     secret = os.environ['secret_key']
     payload = {'response': captcha_response, 'secret': secret}
     response = requests.post("https://www.google.com/recaptcha/api/siteverify", payload)
