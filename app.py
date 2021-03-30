@@ -282,6 +282,7 @@ def sign_up_step_1():
         s.send_message(msg)
         s.quit()
         cur.execute(f"insert into users(email, password) values ('{email}', '{hsh}');")
+        conn.commit()
         return render_template('capture_passed.html')
     else:
         return render_template('capture_failed.html')
@@ -295,6 +296,7 @@ def sign_up_step_2(hsh):
         return redirect(sign_up_step_1)
     email = res[0][1]
     cur.execute(f"delete from users where password='{hsh}';")
+    conn.commit()
     if request.method == 'GET':
         return render_template('sign_up_step_2.html', url=f'/task5/sign-up/{hsh}', email=email)
     pass1 = request.form['pass1']
