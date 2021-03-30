@@ -348,8 +348,6 @@ def main():
     email = session['email']
     cur.execute(f"select * from conns where email = '{email}';")
     res = cur.fetchall()
-    print(email)
-    print(res)
     return render_template('signed_in.html', attempts=res)
 
 
@@ -360,7 +358,7 @@ def work():
     if request.method == 'POST':
         n = request.form['n']
         data = datetime.datetime.now()
-        cur.execute(f"insert into work(time, n, status) values ('{data}', {n}, {'Queued'});")
+        cur.execute(f"insert into work(time, n, status) values ('{data}', {n}, 'Queued');")
         conn.commit()
     cur.execute("select * from work;")
     tasks = cur.fetchall()
