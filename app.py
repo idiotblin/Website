@@ -293,7 +293,7 @@ def sign_up_step_2(hsh):
     res = cur.fetchall()
     if len(res) == 0:
         return redirect(sign_up_step_1)
-    email = res[0][0]
+    email = res[0][1]
     cur.execute(f"delete from users where password='{hsh}';")
     if request.method == 'GET':
         return render_template('sign_up_step_2.html', url=f'/task5/sign-up/{hsh}', email=email)
