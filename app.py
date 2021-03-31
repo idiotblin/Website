@@ -2,6 +2,7 @@ from random import randint, getrandbits, shuffle
 from flask import Flask, render_template, abort, redirect, request, url_for, session
 from email.message import EmailMessage
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 import datetime
 import json
@@ -11,6 +12,7 @@ import requests
 import smtplib
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 app.secret_key = os.environ['secret'].encode()
 
