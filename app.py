@@ -353,7 +353,7 @@ def work():
         data = datetime.datetime.now()
         cur.execute(f"insert into work(time, n, status, email) values ('{data}', {n}, 'Queued', '{email}');")
         conn.commit()
-    cur.execute(f"select * from work where email='{email}';")
+    cur.execute(f"select * from work where email='{email}' order by time desc;")
     tasks = cur.fetchall()
     return render_template('tasks.html', id="work", tasks=tasks)
 
@@ -363,7 +363,7 @@ def main():
     if not session.get('logged', False):
         return redirect(url_for('sign_in'))
     email = session['email']
-    cur.execute(f"select * from conns where email = '{email}';")
+    cur.execute(f"select * from conns where email = '{email}' order by time desc;")
     res = cur.fetchall()
     return render_template('signed_in.html', attempts=res)
 
