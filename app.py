@@ -343,16 +343,17 @@ def sign_out():
     return f"<pre>{'signed out'}</pre>"
 
 
-@app.route('/task5/work/', methods=["GET", "POST"])
+@app.route('/task5/work', methods=["GET", "POST"])
 def work():
     if not session.get('logged', False):
         return redirect(url_for('sign_in'))
+    email = session['email']
     if request.method == 'POST':
         n = request.form['n']
         data = datetime.datetime.now()
-        cur.execute(f"insert into work(time, n, status) values ('{data}', {n}, 'Queued');")
+        cur.execute(f"insert into work(time, n, status, email) values ('{data}', {n}, 'Queued', '{email}');")
         conn.commit()
-    cur.execute("select * from work;")
+    cur.execute(f"select * from work where email='{email}';")
     tasks = cur.fetchall()
     return render_template('tasks.html', id="work", tasks=tasks)
 
