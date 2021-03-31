@@ -343,7 +343,7 @@ def sign_out():
     return f"<pre>{'signed out'}</pre>"
 
 
-@app.route('/task5/work', methods=["GET", "POST"])
+@app.route('/task5/work/', methods=["GET", "POST"])
 def work():
     if not session.get('logged', False):
         return redirect(url_for('sign_in'))
