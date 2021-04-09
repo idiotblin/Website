@@ -1,24 +1,30 @@
 from random import randint, getrandbits, shuffle
-from flask import Flask, render_template, abort, redirect, request, url_for, session
+from flask import Flask, render_template, abort, redirect, request, url_for, session, _app_ctx_stack
 from email.message import EmailMessage
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
+from sqlalchemy.orm import scoped_session
+from sqlalchemy import desc
+
+import models
+from models import User, Conn, Work
+from database import SessionLocal, engine
 
 import datetime
 import json
 import os
-import psycopg2
 import requests
 import smtplib
 
 app = Flask(__name__)
+
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 app.secret_key = os.environ['secret'].encode()
 
-conn = psycopg2.connect(
-    f'dbname={os.environ["Dbname"]} user={os.environ["User"]} password={os.environ["Password"]} host={os.environ["Host"]} port={os.environ["Port"]}')
-cur = conn.cursor()
+app.session = scoped_session(SessionLocal, scopefunc=_app_ctx_stack.__ident_func__)
+
+models.Base.metadata.create_all(bind=engine)
 
 
 @app.route('/')
@@ -273,8 +279,8 @@ def sign_up_step_1():
     if not session.get('enable', False):
         captcha_response = request.form['g-recaptcha-response']
     email = request.form["email"]
-    cur.execute(f"select * from users where email = '{email}';")
-    user_exist = len(cur.fetchall()) != 0
+    res = app.session.query(User).filter_by(email=email).all()
+    user_exist = len(res) != 0
     if is_human(captcha_response) and not user_exist:
         msg = EmailMessage()
         hsh = generate_password_hash(email)
@@ -285,8 +291,8 @@ def sign_up_step_1():
         s = smtplib.SMTP('b.li2sites.ru', 30025)
         s.send_message(msg)
         s.quit()
-        cur.execute(f"insert into users(email, password) values ('{email}', '{hsh}');")
-        conn.commit()
+        app.session.add(User(email=email, password=hsh))
+        app.session.commit()
         return render_template('capture_passed.html')
     else:
         return render_template('capture_failed.html')
@@ -294,22 +300,19 @@ def sign_up_step_1():
 
 @app.route('/task5/sign-up/<hsh>', methods=["GET", "POST"])
 def sign_up_step_2(hsh):
-    cur.execute(f"select * from users where password='{hsh}';")
-    res = cur.fetchall()
+    res = app.session.query(User).filter_by(password=hsh).all()
     if request.method == 'GET':
         if len(res) == 0:
             return redirect(url_for('sign_up_step_1'))
-        email = res[0][1]
-        return render_template('sign_up_step_2.html', url=f'/task5/sign-up/{hsh}', email=email)
-    email = res[0][1]
+        return render_template('sign_up_step_2.html', url=f'/task5/sign-up/{hsh}', email=res[0].email)
+    user = res[0]
     pass1 = request.form['password']
     pass2 = request.form['password2']
     correct = pass1 == pass2
     if correct:
-        cur.execute(f"delete from users where email='{email}';")
-        conn.commit()
-        cur.execute(f"insert into users (email, password) values ('{email}', '{generate_password_hash(pass1)}');")
-        conn.commit()
+        user.password = generate_password_hash(pass1)
+        app.session.add(user)
+        app.session.commit()
     return render_template('sign_up_finished.html', error=correct)
 
 
@@ -318,15 +321,16 @@ def sign_in():
     if request.method == "POST":
         email = request.form['email']
         password = request.form['password']
-        cur.execute(f"select * from users where email = '{email}';")
-        res = cur.fetchall()
-        correct = len(res) != 0 and check_password_hash(res[0][2], password)
+        res = app.session.query(User).filter_by(email=email).all()
+        correct = len(res) != 0 and check_password_hash(res[0].password, password)
         if correct:
             session['logged'] = True
             time = datetime.datetime.now()
             ip = request.remote_addr
-            cur.execute(f"insert into conns (email, time, ip) values ('{email}', '{time}', '{ip}');")
-            conn.commit()
+            user = app.session.query(User).filter_by(email=email).first()
+            user.conns.append(Conn(email=email, time=time, ip=ip))
+            app.session.add(user)
+            app.session.commit()
             session['email'] = email
             return redirect(url_for('main'))
         else:
@@ -343,6 +347,15 @@ def sign_out():
     return f"<pre>{'signed out'}</pre>"
 
 
+@app.route('/task5/')
+def main():
+    if not session.get('logged', False):
+        return redirect(url_for('sign_in'))
+    email = session['email']
+    user_conns = app.session.query(User).filter_by(email=email).first().conns
+    return render_template('signed_in.html', attempts=user_conns)
+
+
 @app.route('/task5/work', methods=["GET", "POST"])
 def work():
     if not session.get('logged', False):
@@ -351,22 +364,18 @@ def work():
     if request.method == 'POST':
         n = request.form['n']
         data = datetime.datetime.now()
-        cur.execute(f"insert into work(time, n, status, email) values ('{data}', {n}, 'Queued', '{email}');")
-        conn.commit()
-    cur.execute(f"select * from work where email='{email}' order by time desc;")
-    tasks = cur.fetchall()
+        user = app.session.query(User).filter_by(email=email).first()
+        user.works.append(Work(time=data, n=n, status='Queued', email=email))
+        app.session.add(user)
+        app.session.commit()
+    tasks = app.session.query(User).filter_by(email=email).first().works
     return render_template('tasks.html', id="work", tasks=tasks)
 
 
-@app.route('/task5/')
-def main():
-    if not session.get('logged', False):
-        return redirect(url_for('sign_in'))
-    email = session['email']
-    cur.execute(f"select * from conns where email = '{email}' order by time desc;")
-    res = cur.fetchall()
-    return render_template('signed_in.html', attempts=res)
+@app.teardown_appcontext
+def remove_session(*args, **kwargs):
+    app.session.remove()
 
-
+    
 if __name__ == '__main__':
     app.run()
