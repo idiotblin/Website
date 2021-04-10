@@ -22,12 +22,12 @@
     <tbody>
     {% for task in tasks %}
         <tr>
-        <td>{{ task[1] }}</td>
-        <td>{{ task[2] }}</td>
-        <td>{{ task[3] }}</td>
-        <td>{{ task[4] }}</td>
-        <td>{{ task[5] }}</td>
-        <td>{{ task[6] }}</td>
+        <td>{{ task.time }}</td>
+        <td>{{ task.n }}</td>
+        <td>{{ task.p }}</td>
+        <td>{{ task.q }}</td>
+        <td>{{ task.status }}</td>
+        <td>{{ task.elapsed }}</td>
         </tr>
     {% else %}
         <tr><td colspan="6" class="table-warning">No work yet:(</td></tr>

@@ -15,8 +15,8 @@
     <tbody>
     {% for attempt in attempts %}
         <tr>
-            <td>{{attempt[2]}}</td>
-            <td>{{attempt[3]}}</td>
+            <td>{{attempt.time}}</td>
+            <td>{{attempt.ip}}</td>
         </tr>
     {% endfor %}
     </tbody>
