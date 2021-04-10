@@ -328,7 +328,7 @@ def sign_in():
             time = datetime.datetime.now()
             ip = request.remote_addr
             user = app.session.query(User).filter_by(email=email).first()
-            user.conns.append(Conn(email=email, time=time, ip=ip))
+            user.conns.add(Conn(email=email, time=time, ip=ip))
             app.session.add(user)
             app.session.commit()
             session['email'] = email
@@ -365,7 +365,7 @@ def work():
         n = request.form['n']
         data = datetime.datetime.now()
         user = app.session.query(User).filter_by(email=email).first()
-        user.works.append(Work(time=data, n=n, status='Queued', email=email))
+        user.works.add(Work(time=data, n=n, status='Queued', email=email))
         app.session.add(user)
         app.session.commit()
     tasks = app.session.query(User).filter_by(email=email).first().works
