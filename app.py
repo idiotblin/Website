@@ -350,7 +350,7 @@ def main():
     if not session.get('logged', False):
         return redirect(url_for('sign_in'))
     email = session['email']
-    user_conns = app.session.query(Conn).filter_by(email=email).first()
+    user_conns = app.session.query(Conn).filter_by(email=email).all()
     return render_template('signed_in.html', attempts=user_conns)
 
 
@@ -364,7 +364,7 @@ def work():
         data = datetime.datetime.now()
         app.session.add(Work(time=data, n=n, status='Queued', email=email))
         app.session.commit()
-    tasks = app.session.query(Work).filter_by(email=email).first()
+    tasks = app.session.query(Work).filter_by(email=email).all()
     return render_template('tasks.html', id="work", tasks=tasks)
 
 
