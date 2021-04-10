@@ -327,9 +327,7 @@ def sign_in():
             session['logged'] = True
             time = datetime.datetime.now()
             ip = request.remote_addr
-            user = app.session.query(User).filter_by(email=email).first()
-            user.conns.add(Conn(email=email, time=time, ip=ip))
-            app.session.add(user)
+            app.session.add(Conn(email=email, time=time, ip=ip))
             app.session.commit()
             session['email'] = email
             return redirect(url_for('main'))
@@ -352,7 +350,7 @@ def main():
     if not session.get('logged', False):
         return redirect(url_for('sign_in'))
     email = session['email']
-    user_conns = app.session.query(User).filter_by(email=email).first().conns
+    user_conns = app.session.query(Conn).filter_by(email=email).first()
     return render_template('signed_in.html', attempts=user_conns)
 
 
@@ -364,11 +362,9 @@ def work():
     if request.method == 'POST':
         n = request.form['n']
         data = datetime.datetime.now()
-        user = app.session.query(User).filter_by(email=email).first()
-        user.works.add(Work(time=data, n=n, status='Queued', email=email))
-        app.session.add(user)
+        app.session.add(Work(time=data, n=n, status='Queued', email=email))
         app.session.commit()
-    tasks = app.session.query(User).filter_by(email=email).first().works
+    tasks = app.session.query(Work).filter_by(email=email).first()
     return render_template('tasks.html', id="work", tasks=tasks)
 
 
