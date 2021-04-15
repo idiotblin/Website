@@ -325,7 +325,7 @@ def sign_in():
         correct = len(res) != 0 and check_password_hash(res[0].password, password)
         if correct:
             session['logged'] = True
-            time = str(datetime.datetime.now().date()) + str(datetime.datetime.now().time())
+            time = datetime.datetime.now()
             ip = request.remote_addr
             app.session.add(Conn(email=email, time=time, ip=ip))
             app.session.commit()
@@ -350,7 +350,7 @@ def main():
     if not session.get('logged', False):
         return redirect(url_for('sign_in'))
     email = session['email']
-    user_conns = app.session.query(Conn).filter_by(email=email).order_by(desc(Conn.time)).all()
+    user_conns = app.session.query(Conn).filter_by(email=email).order_by(desc(Conn.id)).all()
     return render_template('signed_in.html', attempts=user_conns)
 
 
