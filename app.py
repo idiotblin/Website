@@ -364,7 +364,7 @@ def work():
         data = datetime.datetime.now()
         app.session.add(Work(time=data, n=n, status='Queued', email=email))
         app.session.commit()
-    tasks = app.session.query(Work).filter_by(email=email).order_by(desc(Work.time)).all()
+    tasks = app.session.query(Work).filter_by(email=email).order_by(desc(Work.id)).all()
     return render_template('tasks.html', id="work", tasks=tasks)
 
 
