@@ -23,12 +23,12 @@ while True:
         task.status = 'Processing'
         db.add(task)
         db.commit()
-        begin = datetime.datetime.now()
+        begin = datetime.datetime.now().second
         n = task.n
         for p in range(2, int(n ** 0.5) + 1):
             q = n // p
             if q * p == n and prime(p) and prime(q):
-                end = datetime.datetime.now()
+                end = datetime.datetime.now().second
                 task.status = 'Done'
                 task.p = p
                 task.q = q
