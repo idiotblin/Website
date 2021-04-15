@@ -325,7 +325,7 @@ def sign_in():
         correct = len(res) != 0 and check_password_hash(res[0].password, password)
         if correct:
             session['logged'] = True
-            time = datetime.datetime.now()
+            time = str(datetime.datetime.now().date()) + str(datetime.datetime.now().time())
             ip = request.remote_addr
             app.session.add(Conn(email=email, time=time, ip=ip))
             app.session.commit()
@@ -372,6 +372,6 @@ def work():
 def remove_session(*args, **kwargs):
     app.session.remove()
 
-    
+
 if __name__ == '__main__':
     app.run()
