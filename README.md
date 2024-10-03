@@ -59,5 +59,7 @@ This is a web application built with Flask that incorporates various tasks demon
 - `/task1/random/`: Returns a random mark.
 - `/task1/i_will_not/`: Displays a repetitive statement.
 - `/task2/cf/profile/<username>/`: Fetches and displays Codeforces user info.
+- `/task3/cf/profile/<handle>/`: Fetches and displays Codeforces user problems subsmissions
 - `/task4/santa/create`: Create a Santa game.
 - `/task5/sign-up`: User registration process.
+- `/task5/sign-in`: User sign in process.
